@@ -43,6 +43,6 @@ Two key improvements were implemented:
 
 The DWA algorithm is a computationally expensive algorithm and since the algorithm is in implemented in Python, the code cannot run very fast. Some optimizing cases are implemented such as only using obstacles that are near the robot for DWA algorithm and setting the parameters of DWA to reduce calculation complexity. Rewriting the code in a compiled language such as C or C++ would allow for cautious tuning of DWA.
 
-This project was developed as part of the course CMPE434: Introduction to Robotics at Boğaziçi University, taught by Doğan Ulus. Assignments for this course can be found on Introduction to Mobile Robotics repository I have created. If you are new to mobile robotics or want to build a similar project from scratch I suggest you to check out that repository. Assignments are structured from basic to advance. Specifications of this project are given in the link below.
+This project was developed as part of the course CMPE434: Introduction to Robotics at Boğaziçi University, taught by Doğan Ulus. Assignments for this course can be found on CMPE 434: INTRODUCTION TO ROBOTICS ASSIGNMENTS repository I have created. If you are new to mobile robotics or want to build a similar project from scratch I suggest you to check out that repository. Assignments are structured from basic to advance. Specifications of this project are given in the link below.
 
 https://hackmd.io/@doganulus/Skmr9C20yx
