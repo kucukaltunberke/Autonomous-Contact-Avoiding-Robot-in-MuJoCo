@@ -41,8 +41,13 @@ Two key improvements were implemented:
 
 ## Difficulties and Potential Improvements
 
-The DWA algorithm is a computationally expensive algorithm and since the algorithm is in implemented in Python, the code cannot run very fast. Some optimizing cases are implemented such as only using obstacles that are near the robot for DWA algorithm and setting the parameters of DWA to reduce calculation complexity. Rewriting the code in a compiled language such as C or C++ would allow for cautious tuning of DWA.
+The DWA algorithm is a computationally expensive algorithm and since the algorithm is implemented in Python, the code cannot run very fast. Several optimizations are implemented to overcome this challange.
+ - Only using obstacles that are near the robot for DWA algorithm.
+ - Tuning the parameters of DWA to reduce calculation complexity. 
+ - An extra "Higher dt mode" is implemented to increase the simulation timestep in MuJoCo. This reduces the computational cost but makes the algorithm less stable and more fragile. If real-time loop is running too slowly, this mode can be used with adjustable dt multiplier. 
+ 
+Rewriting the code in a compiled language such as C or C++ would allow for higher resolution control.
 
-This project was developed as part of the course CMPE434: Introduction to Robotics at Boğaziçi University, taught by Doğan Ulus. Assignments for this course can be found on Introduction to Mobile Robotics repository I have created. If you are new to mobile robotics or want to build a similar project from scratch I suggest you to check out that repository. Assignments are structured from basic to advance. Specifications of this project are given in the link below.
+This project was developed as part of the course CMPE434: Introduction to Robotics at Boğaziçi University, taught by Doğan Ulus. Assignments for this course can be found on Introduction to Mobile Robotics repository I have created. If you are new to mobile robotics or want to build a similar project from scratch I suggest you to check out that repository. Assignments are structured from basic to advanced. Specifications of this project are given in the link below.
 
 https://hackmd.io/@doganulus/Skmr9C20yx

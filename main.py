@@ -12,6 +12,8 @@ from dynamic_window_approach import dwa_control, Config as DWAConfig
 # Helper construsts for the viewer for pause/unpause functionality.
 paused = False
 
+Higher_dt_mode = False
+dt_multiplier = 2
 
 # Pressing SPACE key toggles the paused state.
 def mujoco_viewer_callback(keycode):
@@ -126,7 +128,7 @@ def main():
         )
 
     raw = obstacleList
-    dense = densify(raw,0.31,0.6)
+    dense = densify(raw,0.301,0.6)
 
     rx , ry = A_Star_path_finder(dense,start_pos,final_pos)
     target_x_list = [2 * x for x in rx]
@@ -141,6 +143,14 @@ def main():
     # Roughly, m keeps static (model) information, and d keeps dynamic (state) information. 
     m = scene_spec.compile()
     d = mujoco.MjData(m)
+    DEFAULT_TIMESTEP = 0.002
+    if Higher_dt_mode:
+    # OPTIONAL PERFORMANCE TUNING:
+    # If your real-time loop is running too slowly, you can trade off
+    # fidelity for speed by taking larger physics steps and bumping
+    # up the solver iterations to keep things stable:
+        m.opt.timestep   = DEFAULT_TIMESTEP * dt_multiplier                         
+        m.opt.iterations = dt_multiplier * 2
 
     obstacles = [m.geom(i).id for i in range(m.ngeom) if m.geom(i).name.startswith("Z")]
     uniform_direction_dist = sp.stats.uniform_direction(2)
@@ -178,8 +188,8 @@ def main():
       dwa_config.predict_time = .2
       dwa_config.to_goal_cost_gain = 3.0
       dwa_config.speed_cost_gain = .15
-      dwa_config.obstacle_cost_gain = 2.5
-      dwa_config.robot_radius = 0.6
+      dwa_config.obstacle_cost_gain = 3.5
+      dwa_config.robot_radius = 0.5
 
       #low pass filter value
       alpha=0.1
@@ -189,6 +199,11 @@ def main():
       yaw_tol=np.deg2rad(75)
       orient_forward_t    = 1
       orient_reverse_t    = 1
+
+      if Higher_dt_mode:
+          orient_forward_t=1/np.sqrt(dt_multiplier)
+          orient_reverse_t=1/np.sqrt(dt_multiplier)
+
       # how hard to steer (±max steering angle)
       steer_lock          = np.pi * 2 
       # how fast to go forward/back
@@ -327,8 +342,13 @@ def main():
                     obstacle_direction[i][0] = -dy
                     obstacle_direction[i][1] = dx
 
-                m.geom_pos[x][0] = m.geom_pos[x][0]+dx*0.001
-                m.geom_pos[x][1] = m.geom_pos[x][1]+dy*0.001
+                obstacle_update = 0.001
+
+                if Higher_dt_mode:
+                    obstacle_update *= dt_multiplier
+
+                m.geom_pos[x][0] = m.geom_pos[x][0]+dx*obstacle_update
+                m.geom_pos[x][1] = m.geom_pos[x][1]+dy*obstacle_update
 
             # mj_step can be replaced with code that also evaluates
             # a policy and applies a control signal before stepping the physics.
