@@ -35,7 +35,7 @@ The output of DWA controller (velocity and yaw rate) is not applied directly to 
 
 Two key improvements were implemented:
 
- 1. If the yaw angle difference between robot's heading and its goal is bigger than 80 degrees, robot enters "Orientation Mode" .It moves forward and backward while applying locked steering to realign itself. This stabilizes the robot and improves DWA performance.
+ 1. If the yaw angle difference between robot's heading and its goal is bigger than 60 degrees, robot enters "Orientation Mode" .It moves forward and backward while applying locked steering to realign itself. This stabilizes the robot and improves DWA performance.
 
  2. If a goal point is occupied by an obstacle, the robot skips it and selects a further point along the path. This prevents the DWA controller targeting locations that are too close to dynamic obstacles. By this improvement the robot is headed into a further point, making the robot's advance on the dungeon smoother.
 
