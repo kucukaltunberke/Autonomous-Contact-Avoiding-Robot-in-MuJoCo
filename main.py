@@ -46,7 +46,7 @@ def densify(obstacleList,width, spacing):
     return dense
 
 
-def A_Star_path_finder(obstacleList,start_pos,final_pos,grid_resolution=0.5,robot_radius=0.5):
+def A_Star_path_finder(obstacleList,start_pos,final_pos,grid_resolution=0.5,robot_radius=0.2):
     ox , oy = zip(*obstacleList)
     sx , sy = start_pos[0] , start_pos[1]
     gx , gy = final_pos[0] , final_pos[1]
@@ -128,7 +128,7 @@ def main():
         )
 
     raw = obstacleList
-    dense = densify(raw,0.301,0.6)
+    dense = densify(raw,0.501,0.25)
 
     rx , ry = A_Star_path_finder(dense,start_pos,final_pos)
     target_x_list = [2 * x for x in rx]
@@ -180,23 +180,23 @@ def main():
       dwa_config.max_speed = 3
       dwa_config.min_speed = -2
       dwa_config.max_yaw_rate = 360 * np.pi / 180
-      dwa_config.max_accel = 10
+      dwa_config.max_accel = 15
       dwa_config.max_delta_yaw_rate = 8.5 * np.pi 
       dwa_config.v_resolution = 0.6
       dwa_config.yaw_rate_resolution = 48 * np.pi / 90
       dwa_config.dt = 0.1
-      dwa_config.predict_time = .2
+      dwa_config.predict_time = .4
       dwa_config.to_goal_cost_gain = 3.0
       dwa_config.speed_cost_gain = .15
-      dwa_config.obstacle_cost_gain = 3.5
-      dwa_config.robot_radius = 0.5
+      dwa_config.obstacle_cost_gain = 2.0
+      dwa_config.robot_radius = 0.1
 
       #low pass filter value
       alpha=0.1
 
       orientation_mode   = None 
       phase_start_time    = 0.0
-      yaw_tol=np.deg2rad(75)
+      yaw_tol=np.deg2rad(60)
       orient_forward_t    = 1
       orient_reverse_t    = 1
 
@@ -217,8 +217,8 @@ def main():
 
       wall_xy = np.array([[x*2, y*2] for x,y in dense])
 
-      arrive_dist_square = 0.9 ** 2
-      finish_dist_square = 1.2 ** 2
+      arrive_dist_square = 1 ** 2
+      finish_dist_square = 0.8 ** 2
 
       while viewer.is_running() and time.time() - start < 3000:
         step_start = time.time()
@@ -227,14 +227,15 @@ def main():
             # initial state [x(m), y(m), yaw(rad), v(m/s), omega(rad/s)]
             state=get_state(d)
             dyn_xy  = np.array([[m.geom_pos[g][0], m.geom_pos[g][1]] for g in obstacles])
-            ob_xy = np.vstack([wall_xy, dyn_xy])
+            dyn_densified = np.array(densify(dyn_xy, 0.161, 0.16))
+            ob_xy = np.vstack([wall_xy, dyn_densified])
 
             path_id_selected = min(path_id + 1 , max_path_id)
 
             target_selected = target_points[path_id_selected]
 
-            target_point_obstacle_check = np.sum((dyn_xy - target_selected)**2, axis=1)
-            target_point_occupied = (target_point_obstacle_check < 1.0**2)
+            target_point_obstacle_check = np.sum((dyn_densified - target_selected)**2, axis=1)
+            target_point_occupied = (target_point_obstacle_check < 1)
 
             # increase the path_id if there is a obstacle near it. 
             # this sets a better target for dwa algorithm
@@ -242,8 +243,8 @@ def main():
                 path_id += 1
                 path_id_selected = min(path_id + 1 ,max_path_id)
                 target_selected = target_points[path_id_selected]                
-                target_point_obstacle_check = np.sum((dyn_xy - target_selected)**2, axis=1)
-                target_point_occupied = (target_point_obstacle_check < 1.0**2)
+                target_point_obstacle_check = np.sum((dyn_densified - target_selected)**2, axis=1)
+                target_point_occupied = (target_point_obstacle_check < 1)
 
 
             curr_pos = state[:2]     
@@ -299,6 +300,9 @@ def main():
             else:
                 u, _traj= _dwa_control(state, dwa_config,target_selected , ob_in_range)
                 v_cmd, raw_steer_cmd = u
+
+                # #Uncomment to see steering and velocity values
+                # print(f"Velocity value: {u[0]} Steering value: {u[1]}")
        
                 raw_steer_cmd *= 2.5
 
